@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeonAudit — Web Performance Auditor</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+</head>
+
+<body>
+
+<header class="header">
+<div class="logo-wrap">
+<img src="neon-logo.svg" class="logo">
+<h1>NeonAudit</h1>
+</div>
+<p class="tagline">Scan. Solve. Shine.</p>
+</header>
+
+<section class="scanner">
+
+<div class="glass scan-box">
+
+<input id="urlInput" placeholder="https://example.com">
+
+<button id="scanBtn" class="neon-btn">
+SCAN WEBSITE
+</button>
+
+</div>
+
+<div id="radarLoader" class="radar hidden">
+<div class="radar-circle"></div>
+<p>Scanning website...</p>
+</div>
+
+</section>
+
+<section id="results" class="hidden">
+
+<div class="glass score-panel">
+
+<h2>Performance Score</h2>
+
+<canvas id="scoreChart"></canvas>
+
+<p id="grade"></p>
+
+</div>
+
+<div class="grid">
+
+<div class="glass metric-card">
+<h3>LCP</h3>
+<p id="lcp"></p>
+</div>
+
+<div class="glass metric-card">
+<h3>CLS</h3>
+<p id="cls"></p>
+</div>
+
+<div class="glass metric-card">
+<h3>INP</h3>
+<p id="inp"></p>
+</div>
+
+<div class="glass metric-card">
+<h3>Requests</h3>
+<p id="requests"></p>
+</div>
+
+</div>
+
+<div class="glass suggestions">
+
+<h2>Optimization Suggestions</h2>
+
+<ul id="suggestionsList"></ul>
+
+</div>
+
+<div class="export">
+
+<button id="downloadJson" class="neon-btn small">Download JSON</button>
+
+<button id="shareBtn" class="neon-btn small">Share Result</button>
+
+</div>
+
+</section>
+
+<section class="history glass">
+
+<h2>Recent Scans</h2>
+
+<ul id="history"></ul>
+
+</section>
+
+<script src="app.js"></script>
+
+</body>
+</html>
