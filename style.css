@@ -1,86 +1,247 @@
-body {
-  margin: 0;
-  background: #0d0d0f;
-  font-family: IRANSans, sans-serif;
-  color: #fff;
-  text-align: center;
-}
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Neon Lines Background</title>
+<style>
+  body {
+    margin: 0;
+    background: #0d0d0f;
+    font-family: IRANSans, sans-serif;
+    color: #fff;
+    text-align: center;
+    overflow: hidden;
+  }
 
-.header {
-  padding: 40px 0;
-}
+  canvas#bgCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+  }
 
-.logo {
-  width: 90px;
-  filter: drop-shadow(0 0 20px #0ff);
-}
+  .header {
+    padding: 40px 0;
+  }
 
-.title {
-  font-size: 40px;
-  letter-spacing: 2px;
-  color: #0ff;
-  text-shadow: 0 0 15px #0ff;
-  margin-top: 10px;
-}
+  .logo {
+    width: 90px;
+    filter: drop-shadow(0 0 20px #0ff);
+  }
 
-.subtitle {
-  margin-top: -10px;
-  opacity: 0.8;
-}
+  .title {
+    font-size: 40px;
+    letter-spacing: 2px;
+    color: #0ff;
+    text-shadow: 0 0 15px #0ff;
+    margin-top: 10px;
+  }
 
-.container {
-  max-width: 600px;
-  margin: 50px auto;
-}
+  .subtitle {
+    margin-top: -10px;
+    opacity: 0.8;
+  }
 
-.input-box {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
+  .container {
+    max-width: 600px;
+    margin: 50px auto;
+    position: relative;
+    z-index: 1;
+  }
 
-#urlInput {
-  width: 70%;
-  padding: 12px;
-  font-size: 16px;
-  border-radius: 12px;
-  border: none;
-  outline: none;
-  background: #1b1b1f;
-  color: #fff;
-}
+  .input-box {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
 
-#scanBtn {
-  padding: 12px 16px;
-  border: none;
-  border-radius: 12px;
-  background: #0ff;
-  color: #000;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.2s;
-}
+  #urlInput {
+    width: 70%;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 12px;
+    border: none;
+    outline: none;
+    background: #1b1b1f;
+    color: #fff;
+  }
 
-#scanBtn:hover {
-  background: #0cc;
-}
+  #scanBtn {
+    padding: 12px 16px;
+    border: none;
+    border-radius: 12px;
+    background: #0ff;
+    color: #000;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+  }
 
-.loading {
-  margin-top: 40px;
-  font-size: 20px;
-  color: #0ff;
-  text-shadow: 0 0 10px #0ff;
-}
+  #scanBtn:hover {
+    background: #0cc;
+  }
 
-.hidden {
-  display: none;
-}
+  .loading {
+    margin-top: 40px;
+    font-size: 20px;
+    color: #0ff;
+    text-shadow: 0 0 10px #0ff;
+  }
 
-.result {
-  background: rgba(255, 255, 255, 0.05);
-  margin-top: 40px;
-  padding: 20px;
-  border-radius: 15px;
-  border: 1px solid #222;
-  text-align: left;
-}
+  .hidden {
+    display: none;
+  }
+
+  .result {
+    background: rgba(255, 255, 255, 0.05);
+    margin-top: 40px;
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid #222;
+    text-align: left;
+  }
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+
+<div class="header">
+  <img src="neon-logo.svg" alt="Neon Logo" class="logo" />
+  <div class="title">NeonAudit</div>
+  <div class="subtitle">Scan. Solve. Shine.</div>
+</div>
+
+<div class="container">
+  <div class="input-box">
+    <input type="text" id="urlInput" placeholder="Enter website URL..." />
+    <button id="scanBtn">SCAN WEBSITE</button>
+  </div>
+
+  <div class="loading hidden" id="loadingIndicator">Loading...</div>
+
+  <div class="result hidden" id="resultBox"></div>
+</div>
+
+<script>
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  let width, height;
+  let points = [];
+  const POINT_COUNT = 50;
+  const MAX_DISTANCE = 150;
+  const NEON_COLOR = 'rgba(0, 255, 255, 0.6)';
+  const NEON_POINT_COLOR = 'rgba(0, 255, 255, 1)';
+  const LINE_WIDTH = 0.7;
+  const POINT_RADIUS = 2;
+
+  // ماوس
+  const mouse = { x: null, y: null, radius: 150 };
+
+  function resize() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+  }
+
+  class Point {
+    constructor() {
+      this.x = Math.random() * width;
+      this.y = Math.random() * height;
+      this.vx = (Math.random() - 0.5) * 0.5;
+      this.vy = (Math.random() - 0.5) * 0.5;
+    }
+
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+
+      if (this.x < 0 || this.x > width) this.vx *= -1;
+      if (this.y < 0 || this.y > height) this.vy *= -1;
+
+      // حرکت نسبت به ماوس
+      let dx = this.x - mouse.x;
+      let dy = this.y - mouse.y;
+      let dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < mouse.radius) {
+        let angle = Math.atan2(dy, dx);
+        let force = (mouse.radius - dist) / mouse.radius;
+        this.vx += force * Math.cos(angle) * 0.2;
+        this.vy += force * Math.sin(angle) * 0.2;
+      }
+
+      // آرومش کردن سرعت
+      this.vx *= 0.95;
+      this.vy *= 0.95;
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, POINT_RADIUS, 0, Math.PI * 2);
+      ctx.fillStyle = NEON_POINT_COLOR;
+      ctx.shadowColor = '#0ff';
+      ctx.shadowBlur = 10;
+      ctx.fill();
+    }
+  }
+
+  function connectPoints() {
+    for (let i = 0; i < points.length; i++) {
+      for (let j = i + 1; j < points.length; j++) {
+        const p1 = points[i];
+        const p2 = points[j];
+        const dx = p1.x - p2.x;
+        const dy = p1.y - p2.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < MAX_DISTANCE) {
+          ctx.beginPath();
+          ctx.strokeStyle = NEON_COLOR;
+          ctx.shadowColor = '#0ff';
+          ctx.shadowBlur = 8;
+          ctx.lineWidth = LINE_WIDTH;
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, width, height);
+    points.forEach(point => {
+      point.update();
+      point.draw();
+    });
+    connectPoints();
+    requestAnimationFrame(animate);
+  }
+
+  window.addEventListener('resize', () => {
+    resize();
+    points = [];
+    for (let i = 0; i < POINT_COUNT; i++) {
+      points.push(new Point());
+    }
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+  });
+
+  // مقداردهی اولیه
+  resize();
+  for (let i = 0; i < POINT_COUNT; i++) {
+    points.push(new Point());
+  }
+  animate();
+</script>
+
+</body>
+</html>
