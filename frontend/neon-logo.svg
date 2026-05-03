@@ -1,0 +1,17 @@
+<svg width="200" height="200" viewBox="0 0 200 200"
+  xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="70" fill="none" stroke="#0ff" stroke-width="4"
+    filter="url(#glow)"/>
+  <text x="50%" y="50%" text-anchor="middle" fill="#0ff"
+    font-size="40" dy=".3em" font-family="Arial">N</text>
+
+  <defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+</svg>
